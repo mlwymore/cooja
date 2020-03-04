@@ -291,7 +291,7 @@ public abstract class MspMote extends AbstractEmulatedMote implements Mote, Watc
   private long lastExecute = -1; /* Last time mote executed */
   private long nextExecute;
   
-  private long executed = 0;
+  private long executed = 0; // Shen: total time the mote has executed
   private long skipped = 0;
   
   public void execute(long time) {
@@ -324,6 +324,7 @@ public abstract class MspMote extends AbstractEmulatedMote implements Mote, Watc
       throw new RuntimeException("Bad event ordering: " + lastExecute + " < " + t);
     }
 
+    // Shen: this part seems to rectify the timeline due to "clock deviation"
     if (((1-deviation) * executed) > skipped) {
       lastExecute = lastExecute + duration; // (t+duration) - (t-lastExecute);
       nextExecute = t+duration;
