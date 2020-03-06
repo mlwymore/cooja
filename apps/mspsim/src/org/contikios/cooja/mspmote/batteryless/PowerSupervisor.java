@@ -4,14 +4,14 @@ public abstract class PowerSupervisor {
     // the discrete interval of power charging, in u second.
     public final static int CHARGING_EXECUTE_DURATION_US = 1;
 
-    public final int MAX_ENERGY;
+    public final double MAX_ENERGY; // in J
 
 
     // the unit of this variable is dependent on its subclass
-    public int currentEnergy = 0;
+    public double currentEnergy = 0;
 
-    public int deathThreshold;
-    public int restartThrshold;
+    public double deathThreshold;
+    public double restartThrshold;
 
     public PowerSupervisor(int maxEnergy, int deathThreshold, int restartThrshold, int curEnergy){
         this.MAX_ENERGY = maxEnergy;

@@ -52,14 +52,14 @@ import se.sics.mspsim.profiler.SimpleProfiler;
 import org.contikios.cooja.mspmote.interfaces.MspClock;
 
 
-public abstract class BatterylessMspMote extends MspMote {
+public abstract class BatterylessMspMote extends MspMote implements BatterylessInterface {
     // the discrete interval of power charging, in u second.
     public final static int CHARGING_EXECUTE_DURATION_US = 1;
 
     private static Logger logger = Logger.getLogger(BatterylessMspMote.class);
 
     public PowerSupervisor ps;
-    public boolean flagDeath = false;
+    public boolean flagDeath = false; // the current status of the node (whether it is dead)
 
     public BatterylessMspMote(MspMoteType moteType, Simulation simulation, PowerSupervisor powerSupervisor) {
         super(moteType, simulation);
@@ -103,7 +103,7 @@ public abstract class BatterylessMspMote extends MspMote {
 
         /**
          * This following part is added by Shen. At here we add the power supervisor to check some additional power conditions
-         * and deterimine whether to put off the execution of mote simulatiom.
+         * and deterimine whether to put off the normal execution of mote simulatiom.
          * */
         // --------------------------------------------------------------------------
         if(flagDeath){
@@ -124,7 +124,7 @@ public abstract class BatterylessMspMote extends MspMote {
         }
 
         // if have power and not death. Then let the power supervisor consume energy
-        // and execute the mote normally as below
+        // during the next execution period and execute the mote normally as below
         ps.keepConsumingEnergy();
 
         // ---------------------------------------------------------------------------
@@ -155,7 +155,14 @@ public abstract class BatterylessMspMote extends MspMote {
         }
     }
 
-    // to simulate the situation where a node dies without power
+    //
+
+    /**
+     *  To simulate the situation where a node dies without power during the next CHARGING_EXECUTE_DURATION_US
+     *  time interval.
+     * @param t: the current time
+     *  added by Shen
+     */
     public void keepDeathAndHarvestEnergy(long t){
         // clear all the previously scheduled execute events
         if (executeMoteEvent.isScheduled()) {
@@ -184,9 +191,23 @@ public abstract class BatterylessMspMote extends MspMote {
 
     public void restart(){
         // get current time
-        long curTime = executeMoteEvent.getTime();
+        // long curTime = executeMoteEvent.getTime();
 
         flagDeath = false;
+
+        /** Shen: reset the node
+         *  not sure about whether the following operations totally make sense
+         *
+         *  There are some other potential methods that may be called here such as:
+         *      "MspMote.initEmulator"
+         *      "MspMote.prepareMote"
+         *      some sub-methods inside the two methods above
+         *      ...
+         */
+        myCpu.reset(); // or use "myCpu.internalReset()"?, both methods comes from "MSP430Core" class
+        myMemory.clearMemory();
+        // some operations with persistent clock here? ...
+
         requestImmediateWakeup();
 
     }

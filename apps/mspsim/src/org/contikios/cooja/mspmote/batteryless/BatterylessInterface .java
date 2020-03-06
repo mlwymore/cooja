@@ -1,7 +1,7 @@
 package org.contikios.cooja.mspmote.batteryless;
 
-import java.util.Collection;
-
 public interface BatteylessInterface {
+    public void keepDeathAndHarvestEnergy(long t);
 
+    public void restart();
 }
